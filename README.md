@@ -175,6 +175,8 @@ curl -N http://localhost:4000/v1/messages \
 
 ### Claude Code（Anthropic 原生 SDK）
 
+> 如果你用 [cc switch](https://github.com/farion1231/cc-switch) 管理多个供应商，**跳到下一节**。
+
 ```bash
 export ANTHROPIC_BASE_URL=http://localhost:4000
 export ANTHROPIC_AUTH_TOKEN=$LITELLM_MASTER_KEY
@@ -188,6 +190,106 @@ export ANTHROPIC_AUTH_TOKEN=$LITELLM_MASTER_KEY
 ```bash
 echo 'export ANTHROPIC_BASE_URL=http://localhost:4000' >> ~/.zshrc
 echo "export ANTHROPIC_AUTH_TOKEN=$(grep ^LITELLM_MASTER_KEY .env | cut -d= -f2)" >> ~/.zshrc
+```
+
+### Claude Code + cc switch（推荐：可视化切换供应商）
+
+[cc switch](https://github.com/farion1231/cc-switch) 是个 Claude Code 配置管理工具，可以让你在多个供应商（Anthropic / DeepSeek / 这套 LiteLLM 网关）之间一键切换。
+
+![cc switch Claude Code 配置示例](docs/cc-switch-claude-code.png)
+
+配置步骤：
+
+**1. 编辑供应商 → 新建 `ai-gateway`，按下面填：**
+
+| 字段 | 填什么 | 说明 |
+| --- | --- | --- |
+| 供应商名称 | `ai-gateway` | 任意起名 |
+| 官网链接 | `http://localhost:4000` | 不影响实际请求 |
+| **请求地址** | **`http://localhost:4000`** | ⚠️ **不要带 `/v1`**——Claude Code 会自动拼 `/v1/messages`，写成 `http://localhost:4000/v1` 会拼成 `/v1/v1/messages` 导致 404 |
+| API Key | `.env` 里 `LITELLM_MASTER_KEY` 的值 | 必须 ≥32 字符、`sk-` 开头 |
+| API 格式 | `Anthropic Messages (原生)` | Claude Code 必须用这个 |
+| 认证字段 | `ANTHROPIC_AUTH_TOKEN（默认）` | cc switch 帮你写进 env，Claude Code 读得到 |
+| **声明支持 1M** | **全部取消勾选** | ⚠️ 勾上会把 `[1M]` 拼到模型名后面，LiteLLM 找不到 |
+| 禁用自动升级 | 勾选 | 否则 Claude Code 可能自动从 Sonnet 升级到 Opus，配置混乱 |
+
+**模型映射参考**（按你的 `config.yaml` 注册的模型配）：
+
+| 角色 | 显示名称 | 实际请求模型 |
+| --- | --- | --- |
+| Sonnet | `deepseek-v4-flash` | `deepseek-v4-flash` |
+| Opus | `deepseek-v4-pro` | `deepseek-v4-pro` |
+| Fable | `gpt-5.6-sol` | `gpt-5.6-sol` |
+| Haiku | `gpt-5.6-terra` | `gpt-5.6-terra` |
+| Subagent | `deepseek-v4-flash` | `deepseek-v4-flash` |
+| 默认兜底模型 | `deepseek-v4-pro` | （选填，未识别角色时用） |
+
+**2. 保存后 cc switch 会在 `~/.claude/settings.json` 写入类似：**
+
+```json
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://localhost:4000",
+    "ANTHROPIC_AUTH_TOKEN": "sk-<your-master-key>",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "deepseek-v4-flash",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "deepseek-v4-pro",
+    "ANTHROPIC_DEFAULT_FABLE_MODEL": "gpt-5.6-sol",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "gpt-5.6-terra",
+    ...
+  }
+}
+```
+
+**3. 启动 Claude Code：**
+
+```bash
+claude
+```
+
+**4. 验证：**
+
+```bash
+# 看 LiteLLM 是否真的收到请求（应看到 deepseek-v4-flash 等模型名）
+npm run logs:litellm | grep -i deepseek
+```
+
+#### 常见坑
+
+| 现象 | 原因 | 修复 |
+| --- | --- | --- |
+| `There's an issue with the selected model (xxx) ... It may not exist` | 请求地址带了 `/v1` → Claude Code 拼出 `/v1/v1/messages` → LiteLLM 404 → Claude Code 误判为 "model not exist" | 请求地址改成 `http://localhost:4000`（去掉 `/v1`） |
+| `selected model: deepseek-v4-flash[1M]` 然后报 model not exist | "声明支持 1M" 勾选把 `[1M]` 拼到模型名 | 全部取消勾选 |
+| UI 登录 / 模型列表 401 | `LITELLM_MASTER_KEY` 太短或不是 `sk-` 开头 | 生成 ≥32 字符的 `sk-...`，例：`sk-$(openssl rand -hex 24)` |
+| 报错说请求没到 LiteLLM | cc switch 写入 `ANTHROPIC_AUTH_TOKEN` 但 Claude Code 期待 `ANTHROPIC_API_KEY` 等历史兼容性问题 | 升级到 cc switch 最新版，或用上面的 `Claude Code（裸 SDK）` 方案手动 export |
+| 调 DeepSeek 直接 OK，调 ai-gateway 就不行 | DeepSeek 路径写的是 `https://api.deepseek.com/anthropic`（不带 `/v1`），而你 ai-gateway 路径带了 `/v1` | 路径对齐——都别带 `/v1` |
+
+### Codex CLI + cc switch
+
+[Codex CLI](https://github.com/openai/codex) 是 OpenAI 官方的代码 Agent，**走 OpenAI Responses API**（比 Chat Completions 更新的协议）。通过 cc switch 转发到 LiteLLM：
+
+![cc switch Codex 配置示例](docs/cc-switch-codex.png)
+
+**关键配置**（与 Claude Code 区别）：
+
+| 字段 | 填什么 | 说明 |
+| --- | --- | --- |
+| 供应商名称 | `ai-gateway` | 任意起名 |
+| 官网链接 | `http://localhost:4000` | 不影响实际请求 |
+| **API 请求地址** | **`http://localhost:4000/v1`** | ⚠️ **这里要带 `/v1`**——与 Claude Code 相反，Codex CLI **不会**自动拼 `/v1/`，请求地址必须是完整的 endpoint |
+| API Key | `.env` 里 `LITELLM_MASTER_KEY` 的值 | 必须 ≥32 字符、`sk-` 开头 |
+| 默认模型 | `gpt-5.6-sol` | 任意已注册模型，例如 `deepseek-v4-flash` / `gpt-5.4` |
+| 上游格式 | `Responses（原生）` | Codex CLI 走 OpenAI Responses API，LiteLLM 的 `/v1/responses` 端点能直接接收 |
+
+**为什么请求地址要带 `/v1`？**
+
+Codex CLI 不会在 base URL 后面拼路径，所以 base URL 必须是完整的 endpoint（`http://localhost:4000/v1`）。Claude Code 不一样，它会自己拼 `/v1/messages`，所以 base URL 不能带 `/v1`——这是两个 CLI 工具设计的根本差异。
+
+**模型映射**（如果有多个 Codex 角色，可以像 Claude Code 那样配置）：在"模型映射"区域按需添加，例如把 `gpt-5.6-sol` 映射到上游的 `gpt-5.6-sol`。
+
+启动 Codex：
+
+```bash
+codex
 ```
 
 ### Cline / Continue / Aider 等 OpenAI 兼容工具
