@@ -1,0 +1,30 @@
+{
+  "name": "litellm-gateway",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LiteLLM proxy as a unified gateway for multiple AI model providers (OpenAI, DeepSeek, Gemini, MiniMax, Zhipu, DashScope, etc.).",
+  "scripts": {
+    "start": "docker compose up -d",
+    "stop": "docker compose down",
+    "restart": "docker compose restart",
+    "restart:litellm": "docker compose restart litellm",
+    "reload": "curl -fsS -X POST -H \"Authorization: Bearer $(grep ^LITELLM_MASTER_KEY .env | cut -d= -f2)\" http://localhost:${LITELLM_PORT:-4000}/config/reload && echo OK",
+    "env:apply": "docker compose up -d --force-recreate litellm",
+    "logs": "docker compose logs -f",
+    "logs:litellm": "docker compose logs -f litellm",
+    "logs:postgres": "docker compose logs -f postgres",
+    "status": "docker compose ps",
+    "pull": "docker compose pull",
+    "rebuild": "docker compose up -d --build",
+    "down": "docker compose down",
+    "down:volumes": "docker compose down -v",
+    "psql": "docker compose exec postgres psql -U litellm -d litellm",
+    "env:init": "test -f .env || cp .env.example .env",
+    "env:check": "test -f .env && echo '.env exists' || (echo '.env missing, run: npm run env:init' && exit 1)",
+    "health": "curl -fsS http://localhost:${LITELLM_PORT:-4000}/health/liveliness && echo OK",
+    "models": "curl -fsS -H \"Authorization: Bearer $(grep ^LITELLM_MASTER_KEY .env | cut -d= -f2)\" http://localhost:${LITELLM_PORT:-4000}/v1/models"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,40 @@
+# === 密钥与本地配置（绝不能提交） ===
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# === Node（package.json 只是个脚本分发器，没有依赖，但保留） ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# === Python（脚本/小工具可能用到） ===
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# === Docker ===
+docker-compose.override.yml
+
+# === 日志与临时 ===
+*.log
+logs/
+tmp/
+.tmp/
+
+# === 编辑器 / 系统 ===
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# === LiteLLM / Postgres 运行时产物 ===
+postgres-data/
