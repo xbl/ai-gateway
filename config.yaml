@@ -67,6 +67,39 @@ model_list:
       api_base: https://api.gaogeaii.com/v1
       timeout: 90
 
+  # === AgentRouter 代理（OpenAI/Anthropic 兼容，base=https://agentrouter.org/v1） ===
+  # 有客户端检测：默认 User-Agent 会被拒（unauthorized client detected），
+  # 需通过 extra_headers 伪装成 claude-cli。
+  - model_name: agentrouter/claude-opus-5
+    litellm_params:
+      model: openai/claude-opus-5
+      api_key: os.environ/AGENTROUTER_API_KEY
+      api_base: https://agentrouter.org/v1
+      extra_headers:
+        User-Agent: claude-cli/2.0.0 (external, cli)
+      timeout: 90
+      stream_timeout: 25
+
+  - model_name: agentrouter/claude-opus-4-8
+    litellm_params:
+      model: openai/claude-opus-4-8
+      api_key: os.environ/AGENTROUTER_API_KEY
+      api_base: https://agentrouter.org/v1
+      extra_headers:
+        User-Agent: claude-cli/2.0.0 (external, cli)
+      timeout: 90
+      stream_timeout: 25
+
+  - model_name: agentrouter/gpt-5.6-sol
+    litellm_params:
+      model: openai/gpt-5.6-sol
+      api_key: os.environ/AGENTROUTER_API_KEY
+      api_base: https://agentrouter.org/v1
+      extra_headers:
+        User-Agent: claude-cli/2.0.0 (external, cli)
+      timeout: 90
+      stream_timeout: 25
+
   # === Anthropic Claude ===
   # 同时支持 OpenAI 协议（/v1/chat/completions）和 Anthropic 协议（/v1/messages）
   - model_name: claude-sonnet-4.5
