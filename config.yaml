@@ -4,25 +4,10 @@
 
 router_settings:
   timeout: 90
-  stream_timeout: 25
-  num_retries: 0
+  stream_timeout: 60
+  num_retries: 1
 
 model_list:
-  - model_name: gpt-4o-mini
-    litellm_params:
-      model: openai/gpt-4o-mini
-      api_key: os.environ/OPENAI_API_KEY
-      timeout: 90
-      stream_timeout: 25
-      service_tier: priority 
-
-  - model_name: gpt-4o
-    litellm_params:
-      model: openai/gpt-4o
-      api_key: os.environ/OPENAI_API_KEY
-      timeout: 90
-      stream_timeout: 25
-
   # === GaogeAI 代理（OpenAI 兼容，base=https://api.gaogeaii.com/v1） ===
   # 仅支持 OpenAI 协议；/v1/messages 直接 403。
   # 模型名沿用代理 /v1/models 返回的 id（gpt-5.4 / gpt-5.5 / gpt-5.6-sol 等），
@@ -133,21 +118,6 @@ model_list:
       model: deepseek/deepseek-v4-pro
       api_key: os.environ/DEEPSEEK_API_KEY
 
-  - model_name: gemini-2.5-flash
-    litellm_params:
-      model: gemini/gemini-2.5-flash
-      api_key: os.environ/GEMINI_API_KEY
-
-  - model_name: MiniMax-M2.7-highspeed
-    litellm_params:
-      model: minimax/MiniMax-M2.7-highspeed
-      api_key: os.environ/MINIMAX_API_KEY
-      api_base: https://api.minimaxi.com
-      # M2.x 无法关闭 thinking（disabled 无效）；勿传 thinking，LiteLLM 会 UnsupportedParams。
-      # reasoning_split 仅分离字段，不省延迟；短 JSON 路径不建议用 M2.x。
-      extra_body:
-        reasoning_split: true
-
   - model_name: MiniMax-M3
     litellm_params:
       model: minimax/MiniMax-M3
@@ -158,33 +128,6 @@ model_list:
       # 与 M2.x 同：传 thinking.type=disabled 会被上游报 UnsupportedParams。
       extra_body:
         reasoning_split: true
-
-  - model_name: glm-asr-2512
-    litellm_params:
-      model: openai/glm-asr-2512
-      api_base: https://open.bigmodel.cn/api/paas/v4
-      api_key: os.environ/ZHIPU_API_KEY
-
-  - model_name: qwen3-asr-flash
-    litellm_params:
-      model: openai/qwen3-asr-flash
-      api_base: https://ws-3gks57te4mvyrdlj.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1
-      api_key: os.environ/DASHSCOPE_API_KEY
-
-  # 新加坡 DashScope 聊天 Flash（与 ASR 同 key / 同 workspace）。课堂短延迟务必关 thinking。
-  - model_name: qwen3-flash
-    litellm_params:
-      model: openai/qwen3.6-flash
-      api_base: https://ws-3gks57te4mvyrdlj.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1
-      api_key: os.environ/DASHSCOPE_API_KEY
-      extra_body:
-        enable_thinking: false
-
-  - model_name: minimax-tts
-    litellm_params:
-      model: minimax/speech-2.8-hd
-      api_key: os.environ/MINIMAX_API_KEY
-      api_base: https://api.minimaxi.com
 
 litellm_settings:
   request_timeout: 90
