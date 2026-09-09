@@ -46,7 +46,7 @@ cp .env.example .env
 | `MINIMAX_API_KEY` | 视模型 | 用 `minimax-*` 模型时必填 |
 | `ZHIPU_API_KEY` | 视模型 | 用 GLM ASR 时必填 |
 | `DASHSCOPE_API_KEY` | 视模型 | 用 DashScope qwen 模型时必填 |
-| `LITELLM_PORT` | ❌ | 网关端口，默认 `4000` |
+| `LITELLM_PORT` | ❌ | 网关端口，默认 `5200` |
 
 **只填你要用的 provider 的 key 即可**——没填的 provider 对应的模型启动会报 `AuthenticationError`，不影响其它模型。
 

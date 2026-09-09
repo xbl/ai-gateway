@@ -85,6 +85,52 @@ model_list:
       timeout: 90
       stream_timeout: 25
 
+  - model_name: agentrouter/deepseek-v4-flash
+    litellm_params:
+      model: openai/deepseek-v4-flash
+      api_key: os.environ/AGENTROUTER_API_KEY
+      api_base: https://agentrouter.org/v1
+      extra_headers:
+        User-Agent: claude-cli/2.0.0 (external, cli)
+      timeout: 90
+      stream_timeout: 25
+
+  - model_name: agentrouter/glm-5.3
+    litellm_params:
+      model: openai/glm-5.3
+      api_key: os.environ/AGENTROUTER_API_KEY
+      api_base: https://agentrouter.org/v1
+      extra_headers:
+        User-Agent: claude-cli/2.0.0 (external, cli)
+      timeout: 90
+      stream_timeout: 25
+
+  # === JustWoker 代理（Anthropic Messages，key 待补充） ===
+  # 为避免与现有 gpt-5.6-terra 渠道重名，使用 justwoker/ 前缀选择此渠道。
+  - model_name: justwoker/gpt-5.6-terra
+    litellm_params:
+      model: anthropic/gpt-5.6-terra
+      api_key: os.environ/JUSTWOKER_API_KEY
+      api_base: https://api.justwoker.icu
+      timeout: 90
+      stream_timeout: 60
+
+  - model_name: justwoker/gpt-5.6-luna
+    litellm_params:
+      model: anthropic/gpt-5.6-luna
+      api_key: os.environ/JUSTWOKER_API_KEY
+      api_base: https://api.justwoker.icu
+      timeout: 90
+      stream_timeout: 60
+
+  - model_name: justwoker/gpt-5.6-sol
+    litellm_params:
+      model: anthropic/gpt-5.6-sol
+      api_key: os.environ/JUSTWOKER_API_KEY
+      api_base: https://api.justwoker.icu
+      timeout: 90
+      stream_timeout: 60
+
   # === Anthropic Claude ===
   # 同时支持 OpenAI 协议（/v1/chat/completions）和 Anthropic 协议（/v1/messages）
   - model_name: claude-sonnet-4.5
@@ -120,9 +166,11 @@ model_list:
 
   - model_name: MiniMax-M3
     litellm_params:
-      model: minimax/MiniMax-M3
+      # 用 OpenAI 兼容端点而非 minimax provider：minimax provider 不支持
+      # /v1/messages(Claude Code) 的协议转换，会 404；openai/ 链路两边都通。
+      model: openai/MiniMax-M3
       api_key: os.environ/MINIMAX_API_KEY
-      api_base: https://api.minimaxi.com
+      api_base: https://api.minimaxi.com/v1
       # M3 默认开 thinking，completion_tokens 包含 reasoning_tokens；
       # reasoning_split 把 reasoning 拆到 reasoning_content 字段，正文只含最终答案。
       # 与 M2.x 同：传 thinking.type=disabled 会被上游报 UnsupportedParams。
@@ -131,6 +179,7 @@ model_list:
 
 litellm_settings:
   request_timeout: 90
+  drop_params: true   # codex 等客户端会发送 reasoning_effort 等参数，MiniMax 等不支持时自动丢弃而不是 400
   callbacks:
     - prometheus
   prometheus_metrics_config:
