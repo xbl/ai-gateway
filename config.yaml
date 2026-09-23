@@ -45,6 +45,36 @@ model_list:
       timeout: 90
       stream_timeout: 25
 
+  - model_name: gpt-6-astra
+    litellm_params:
+      model: openai/gpt-6-astra
+      api_key: os.environ/GAOGEAII_API_KEY
+      api_base: https://api.gaogeaii.com/v1
+      timeout: 90
+      stream_timeout: 25
+
+  - model_name: gpt-6-sol
+    litellm_params:
+      model: openai/gpt-6-sol
+      api_key: os.environ/GAOGEAII_API_KEY
+      api_base: https://api.gaogeaii.com/v1
+      timeout: 90
+      stream_timeout: 25
+
+  - model_name: gpt-image-2.5-flare
+    litellm_params:
+      model: openai/gpt-image-2.5-flare
+      api_key: os.environ/GAOGEAII_API_KEY
+      api_base: https://api.gaogeaii.com/v1
+      timeout: 90
+
+  - model_name: gpt-image-2.5-sunburst
+    litellm_params:
+      model: openai/gpt-image-2.5-sunburst
+      api_key: os.environ/GAOGEAII_API_KEY
+      api_base: https://api.gaogeaii.com/v1
+      timeout: 90
+
   - model_name: gpt-image-2
     litellm_params:
       model: openai/gpt-image-2
@@ -105,27 +135,11 @@ model_list:
       timeout: 90
       stream_timeout: 25
 
-  # === JustWoker 代理（Anthropic Messages，key 待补充） ===
-  # 为避免与现有 gpt-5.6-terra 渠道重名，使用 justwoker/ 前缀选择此渠道。
-  - model_name: justwoker/gpt-5.6-terra
+  # === JustWoker 代理（仅支持 Anthropic Messages /v1/messages 端点） ===
+  # 仅支持 claude-opus-4-8，使用 anthropic provider 走 /v1/messages 协议
+  - model_name: justwoker/claude-opus-4-8
     litellm_params:
-      model: anthropic/gpt-5.6-terra
-      api_key: os.environ/JUSTWOKER_API_KEY
-      api_base: https://api.justwoker.icu
-      timeout: 90
-      stream_timeout: 60
-
-  - model_name: justwoker/gpt-5.6-luna
-    litellm_params:
-      model: anthropic/gpt-5.6-luna
-      api_key: os.environ/JUSTWOKER_API_KEY
-      api_base: https://api.justwoker.icu
-      timeout: 90
-      stream_timeout: 60
-
-  - model_name: justwoker/gpt-5.6-sol
-    litellm_params:
-      model: anthropic/gpt-5.6-sol
+      model: anthropic/claude-opus-4-8
       api_key: os.environ/JUSTWOKER_API_KEY
       api_base: https://api.justwoker.icu
       timeout: 90
