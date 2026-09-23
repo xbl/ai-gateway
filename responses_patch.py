@@ -63,11 +63,13 @@ def _normalize(messages: Any) -> Any:
         return messages
 
     normalized = list(messages)
-    # DeepSeek thinking mode requires the reasoning_content field to be
-    # present on assistant turns that contain tool calls. Responses -> Chat
-    # conversion can otherwise drop an empty reasoning segment intermittently.
+    # DeepSeek thinking mode requires the reasoning_content field on EVERY
+    # assistant turn in the conversation history, not only those that contain
+    # tool_calls. Responses -> Chat conversion strips reasoning items, so we
+    # inject an empty reasoning_content for any assistant message that lost
+    # it during transformation. The upstream accepts "" as "no reasoning".
     for message in normalized:
-        if _get(message, "role") == "assistant" and _get(message, "tool_calls"):
+        if _get(message, "role") == "assistant":
             if _get(message, "reasoning_content") is None:
                 _set(message, "reasoning_content", "")
 
